@@ -1,0 +1,2412 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考试成绩奖励计算器 v30</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .mode-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .mode-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: #e9ecef;
+            border: none;
+            border-right: 1px solid #dee2e6;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-tab:last-child {
+            border-right: none;
+        }
+        
+        .mode-tab:hover {
+            background: #f1f3f5;
+        }
+        
+        .mode-tab.active {
+            background: #17a2b8;
+            color: white;
+            border-top: 3px solid #2575fc;
+        }
+        
+        .mode-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .mode-content.active {
+            display: block;
+        }
+        
+        h2 {
+            color: #2575fc;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .input-container {
+            margin-bottom: 20px;
+        }
+        
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background-color: white;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            border-color: #2575fc;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.1);
+        }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .slider-container label {
+            width: 100px;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+            font-size: 16px;
+        }
+        
+        .slider-percent-value {
+            width: 50px;
+            text-align: right;
+            font-weight: 600;
+            color: #2575fc;
+            margin: 0 8px; /* 缩小间距为约2个汉字宽度 */
+        }
+        
+        .percentage-slider {
+            width: 100px;
+            height: 8px;
+            -webkit-appearance: none;
+            background: #e9ecef;
+            border-radius: 4px;
+            outline: none;
+            margin: 0 5px;
+        }
+        
+        .percentage-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            background: #2575fc;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .subject-header h3 {
+            margin: 0;
+            color: #495057;
+        }
+        
+        .add-subject-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .add-subject-btn:hover {
+            background: #218838;
+        }
+        
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .subject-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .subject-card:hover {
+            border-color: #2575fc;
+            box-shadow: 0 4px 10px rgba(37, 117, 252, 0.1);
+        }
+        
+        .subject-card:nth-child(7n+1) { background-color: #e8f4fd; border-color: #b6d9f7; }
+        .subject-card:nth-child(7n+2) { background-color: #f0f9e8; border-color: #c9e2b3; }
+        .subject-card:nth-child(7n+3) { background-color: #fef7e0; border-color: #f9e0a9; }
+        .subject-card:nth-child(7n+4) { background-color: #f5e8f7; border-color: #d4b0d9; }
+        .subject-card:nth-child(7n+5) { background-color: #e8f7f0; border-color: #a8e6cf; }
+        .subject-card:nth-child(7n+6) { background-color: #fff0f0; border-color: #f5c6cb; }
+        .subject-card:nth-child(7n) { background-color: #f0f0f8; border-color: #c9c9e6; }
+        
+        .delete-subject {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            z-index: 10;
+        }
+        
+        .delete-subject:hover {
+            background: #c82333;
+        }
+        
+        .subject-name-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .subject-name-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            width: 30px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        
+        .subject-name-input {
+            width: 100px;
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            background: white;
+            transition: border-color 0.3s ease;
+            margin-left: 4px;
+        }
+        
+        .subject-name-input:focus {
+            border-color: #2575fc;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 117, 252, 0.1);
+        }
+        
+        .subject-score-row {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .score-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .score-input-item {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .score-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            width: 30px;
+            flex-shrink: 0;
+        }
+        
+        .subject-max-score-input, .subject-score-input {
+            width: 50px; /* 缩小宽度为50px，足够显示3位数字 */
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: border-color 0.3s ease;
+            margin-left: 4px;
+        }
+        
+        .subject-max-score-input:focus, .subject-score-input:focus {
+            border-color: #2575fc;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 117, 252, 0.1);
+        }
+        
+        .mode-switch {
+            display: flex;
+            margin-bottom: 25px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .mode-btn:not(.active):hover {
+            background: #e9ecef;
+        }
+        
+        .exam-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .exam-type-btn {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .exam-type-btn.active {
+            background: #2575fc;
+            color: white;
+            border-color: #2575fc;
+        }
+        
+        .exam-type-btn:hover:not(.active) {
+            background: #e9ecef;
+        }
+        
+        .weight-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .weight-input-container label {
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .weight-input-container input {
+            width: 80px;
+            padding: 10px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .weight-input-container span {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .add-exam-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .add-exam-btn:hover {
+            background: #138496;
+        }
+        
+        .exam-records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .exam-records-table th, .exam-records-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+        
+        .exam-records-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .exam-records-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .delete-record-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .delete-record-btn:hover {
+            background: #c82333;
+        }
+        
+        .reward-btn {
+            background: #2575fc;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            display: block;
+            margin: 0 auto 30px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .reward-btn:hover {
+            background: #1c6fe2;
+        }
+        
+        .result-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #2575fc;
+            border-radius: 8px;
+            padding: 20px;
+            width: 60%;
+        }
+        
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+            white-space: nowrap;
+        }
+        
+        .score-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .score-label {
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .score-value {
+            font-weight: 600;
+            color: #212529;
+            white-space: nowrap;
+        }
+        
+        .reward-amount {
+            color: #28a745;
+            font-size: 1.2rem;
+        }
+        
+        .penalty-amount {
+            color: #dc3545;
+            font-size: 1.2rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .compact-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .reward-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+        
+        .reward-input-group label {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+            font-size: 16px;
+        }
+        
+        .reward-input-group input {
+            width: 120px;
+            padding: 8px 10px;
+            background-color: white;
+        }
+        
+        .compact-controls-row .slider-container {
+            flex: 1;
+            min-width: 300px;
+            margin-bottom: 0;
+        }
+        
+        .compact-controls-row .slider-container label {
+            width: 100px;
+            font-size: 16px;
+        }
+        
+        .rank-controls-top {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .rank-controls-top .reward-input-group {
+            margin-bottom: 0;
+        }
+        
+        .rank-controls-top .slider-container {
+            flex: 1;
+            min-width: 300px;
+            margin-bottom: 0;
+        }
+        
+        .rank-controls-top .slider-container label {
+            width: 100px;
+            font-size: 16px;
+        }
+        
+        .rank-mobile-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .rank-mobile-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .rank-mobile-label {
+            font-weight: 600;
+            color: #495057;
+            width: 120px;
+            font-size: 16px;
+        }
+        
+        .rank-mobile-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            background-color: white;
+        }
+        
+        .fusion-mobile-reward-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .compact-number {
+            min-width: 40px;
+            text-align: right;
+            font-family: monospace;
+            display: inline-flex;
+            align-items: baseline;
+        }
+        
+        .score-numbers {
+            display: flex;
+            gap: 2px;
+            align-items: baseline;
+        }
+        
+        .score-numbers span {
+            display: inline-flex;
+            align-items: baseline;
+        }
+        
+        .subject-card-optimized {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .subject-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .subject-name-container {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .subject-inputs-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .score-item-compact {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .multiple-weight-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .multiple-weight-label {
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .multiple-weight-input {
+            width: 60px;
+            padding: 8px 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        .multiple-percent-sign {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        .fusion-sliders-container {
+            margin-bottom: 20px;
+        }
+        
+        .fusion-slider-row {
+            margin-bottom: 10px;
+        }
+        
+        #modeFusion .reward-btn {
+            margin-top: 20px;
+        }
+        
+        /* 新增：计算原理说明样式 */
+        .explanation-box {
+            background: #f0f7ff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 5px solid #2575fc;
+        }
+        
+        .explanation-box h3 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .explanation-box ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .explanation-box li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .explanation-box p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .explanation-box strong {
+            color: #495057;
+        }
+        
+        @media (min-width: 769px) {
+            .subtitle {
+                display: block;
+            }
+            
+            .rank-mobile-layout {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+            
+            .rank-mobile-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .rank-mobile-label {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            
+            .rank-mobile-input {
+                width: 100%;
+            }
+            
+            /* 修改：模式三的三个滑块在电脑端同行显示 */
+            .fusion-sliders-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr; /* 改为三列 */
+                gap: 20px;
+                margin-bottom: 10px;
+            }
+            
+            .fusion-slider-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+            
+            .fusion-slider-row .slider-container {
+                margin-bottom: 5px;
+            }
+            
+            .explanation-box {
+                width: 80%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .subtitle {
+                display: none;
+            }
+            
+            .mode-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .mode-tab {
+                flex: 1 0 50%;
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+            
+            .mode-content {
+                padding: 20px;
+            }
+            
+            .result-box {
+                width: 100%;
+            }
+            
+            .subjects-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .subject-name-input {
+                width: 150px;
+            }
+            
+            .subject-max-score-input, .subject-score-input {
+                width: 50px; /* 移动端保持50px */
+            }
+            
+            .compact-controls-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .compact-controls-row .slider-container {
+                min-width: 100%;
+            }
+            
+            .compact-controls-row .reward-input-group {
+                width: 100%;
+            }
+            
+            .compact-controls-row .reward-input-group input {
+                width: 100%;
+            }
+            
+            .rank-controls-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .rank-controls-top .slider-container {
+                min-width: 100%;
+            }
+            
+            .rank-controls-top .reward-input-group {
+                width: 100%;
+            }
+            
+            .rank-controls-top .reward-input-group input {
+                width: 100%;
+            }
+            
+            .rank-mobile-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .rank-mobile-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .rank-mobile-input {
+                width: 100%;
+            }
+            
+            .fusion-sliders-container {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .fusion-slider-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            
+            .exam-records-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                font-size: 12px;
+            }
+            
+            .exam-records-table th, .exam-records-table td {
+                padding: 8px 10px;
+            }
+            
+            #modeFusion .reward-btn {
+                margin-top: 20px;
+            }
+            
+            .explanation-box {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mode-tab {
+                flex: 1 0 100%;
+            }
+            
+            .result-box {
+                width: 100%;
+            }
+            
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .subject-name-input {
+                width: 120px;
+            }
+            
+            .subject-max-score-input, .subject-score-input {
+                width: 60px; /* 小屏幕上恢复为60px以便触摸 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 考试成绩奖励计算器 v30</h1>
+            <p class="subtitle">奖成绩、奖排名、奖平时、罚退步</p>
+        </header>
+        
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="score">模式一：成绩奖励</button>
+            <button class="mode-tab" data-mode="rank">模式二：排名奖励</button>
+            <button class="mode-tab" data-mode="fusion">模式三：融合奖励</button>
+            <button class="mode-tab" data-mode="multiple">模式四：多次考加权</button>
+        </div>
+        
+        <div id="modeScore" class="mode-content active">
+            <h2>📈 成绩奖励计算</h2>
+            
+            <div class="input-container">
+                <div class="compact-controls-row">
+                    <div class="reward-input-group">
+                        <label>奖励总额（元）</label>
+                        <input type="number" id="scoreTotalReward" min="0" value="1000" step="100">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label>允许丢分比</label>
+                        <span class="slider-percent-value" id="scoreLossPercentValue">30%</span>
+                        <input type="range" id="scoreLossPercentSlider" min="0" max="100" value="30" class="percentage-slider">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subject-header">
+                <h3>各科成绩输入</h3>
+                <button class="add-subject-btn" id="scoreAddSubjectBtn">+ 添加科目</button>
+            </div>
+            
+            <div class="subjects-grid" id="scoreSubjectsGrid"></div>
+            
+            <button class="reward-btn" onclick="calculateScoreReward()">计算成绩奖励</button>
+            
+            <div class="result-container">
+                <div class="result-box" id="scoreResultBox">
+                    <div class="score-item score-item-compact">
+                        <span class="score-label">得分/满分</span>
+                        <div class="score-numbers">
+                            <span class="score-value compact-number" id="scoreTotalScore">0</span>
+                            <span>/</span>
+                            <span class="compact-number" id="scoreTotal">0</span>
+                        </div>
+                    </div>
+                    <div class="score-item score-item-compact">
+                        <span class="score-label">丢分/允许丢分</span>
+                        <div class="score-numbers">
+                            <span class="score-value compact-number" id="scoreLostPoints">0</span>
+                            <span>/</span>
+                            <span class="compact-number" id="scoreMaxLossPoints">0</span>
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">成绩奖励比例</span>
+                        <span class="score-value" id="scoreRewardPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">最终奖励金额</span>
+                        <span class="score-value reward-amount" id="scoreRewardAmount">0 元</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 模式一计算原理说明 -->
+            <div class="explanation-box">
+                <h3>📊 模式一计算原理（成绩奖励）</h3>
+                <p>采用平方根函数确保高分区域每分"价值"更高，激励学生争取更高分数：</p>
+                <ul>
+                    <li><strong>奖励公式</strong>：奖励金额 = 奖励总额 × (1 - √(丢分 ÷ 最大允许丢分))</li>
+                    <li><strong>丢分计算</strong>：丢分 = 总分 - 实际得分</li>
+                    <li><strong>最大允许丢分</strong> = 总分 × 允许丢分百分比</li>
+                    <li><strong>激励效果</strong>：分数越高，每提高1分获得的奖励越多，避免"应付"心态</li>
+                    <li><strong>无奖励条件</strong>：当丢分 ≥ 最大允许丢分时，奖励为0元</li>
+                    <li><strong>特点</strong>：奖励曲线呈现先缓后急的趋势，高分区域激励效果更强</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="modeRank" class="mode-content">
+            <h2>🏆 排名奖励计算</h2>
+            
+            <div class="input-container">
+                <div class="mode-switch">
+                    <div class="mode-btn active" id="rankClassModeBtn">班级模式</div>
+                    <div class="mode-btn" id="rankSchoolModeBtn">年级模式</div>
+                </div>
+                
+                <div class="rank-controls-top">
+                    <div class="reward-input-group">
+                        <label>奖励总额（元）</label>
+                        <input type="number" id="rankTotalReward" min="0" value="1000" step="100">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label>奖励范围</label>
+                        <span class="slider-percent-value" id="rankClassRewardPercentValue">30%</span>
+                        <input type="range" id="rankClassRewardPercent" min="5" max="100" value="30" class="percentage-slider">
+                    </div>
+                </div>
+                
+                <div class="rank-mobile-layout">
+                    <div class="rank-mobile-item">
+                        <div class="rank-mobile-label">班级/年级人数</div>
+                        <input type="number" id="rankTotalStudents" min="1" value="55" placeholder="如：55" class="rank-mobile-input">
+                    </div>
+                    <div class="rank-mobile-item">
+                        <div class="rank-mobile-label">上次考试名次</div>
+                        <input type="number" id="rankPrevious" min="1" value="20" placeholder="上次名次" class="rank-mobile-input">
+                    </div>
+                    <div class="rank-mobile-item">
+                        <div class="rank-mobile-label">本次考试名次</div>
+                        <input type="number" id="rankCurrent" min="1" value="10" placeholder="本次名次" class="rank-mobile-input">
+                    </div>
+                </div>
+                
+                <!-- 删除了 rankSchoolConfig 部分 -->
+            </div>
+            
+            <button class="reward-btn" onclick="calculateRankReward()">计算排名奖励</button>
+            
+            <div class="result-container">
+                <div class="result-box" id="rankResultBox">
+                    <div class="score-item">
+                        <span class="score-label">当前模式</span>
+                        <span class="score-value" id="rankCurrentMode">班级模式</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">名次变化</span>
+                        <span class="score-value" id="rankChange">进步10名</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">名次区间</span>
+                        <span class="score-value" id="rankCurrentTier">优秀区</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">基础奖励</span>
+                        <span class="score-value" id="rankBaseReward">0 元</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">进步奖励</span>
+                        <span class="score-value" id="rankProgressReward">0 元</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">排名奖励比例</span>
+                        <span class="score-value" id="rankRewardPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">最终奖励金额</span>
+                        <span class="score-value reward-amount" id="rankRewardAmount">0 元</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 模式二计算原理说明 -->
+            <div class="explanation-box">
+                <h3>🏆 模式二计算原理（排名奖励）</h3>
+                <p>采用分档奖励制度，根据班级/全校规模自适应调整，科学激励学生进步：</p>
+                <ul>
+                    <li><strong>班级模式（≤150人）</strong>：采用绝对名次分档，对高名次给予重奖，鼓励竞争</li>
+                    <li><strong>全校模式（>150人）</strong>：采用相对百分比分档，适应大规模竞争，保持激励公平性</li>
+                    <li><strong>基础奖励</strong>：根据当前名次给予基础奖励，只有当前名次在有奖名次范围内才有基础奖励</li>
+                    <li><strong>进步/退步奖惩</strong>：根据名次变化给予额外奖励或惩罚，分档计算</li>
+                    <li><strong>分档规则</strong>：
+                        <ul>
+                            <li>精英区（前1%）：每进步/退步1名，奖励/惩罚 = 10% × 对应名次所在分档的基础奖励</li>
+                            <li>优秀区（1%-5%）：每进步/退步1名，奖励/惩罚 = 8% × 对应名次所在分档的基础奖励</li>
+                            <li>良好区（5%-20%）：每进步/退步1名，奖励/惩罚 = 6% × 对应名次所在分档的基础奖励</li>
+                            <li>进步区（20%-有奖名次%）：每进步/退步1名，奖励/惩罚 = 5% × 对应名次所在分档的基础奖励</li>
+                            <li>无奖区（有奖名次%之后）：每进步/退步1名，奖励/惩罚 = 3% × 总奖励金额</li>
+                        </ul>
+                    </li>
+                    <li><strong>最终奖励限制</strong>：最终奖励金额（基础奖励+进步/退步奖惩）的绝对值不超过奖励总额</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="modeFusion" class="mode-content">
+            <h2>⚖️ 融合奖励计算</h2>
+            
+            <div class="input-container">
+                <div class="compact-controls-row">
+                    <div class="reward-input-group">
+                        <label>奖励总额（元）</label>
+                        <input type="number" id="fusionTotalReward" min="0" value="1000" step="100">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label>允许丢分比</label>
+                        <span class="slider-percent-value" id="fusionLossPercentValue">30%</span>
+                        <input type="range" id="fusionLossPercentSlider" min="0" max="100" value="30" class="percentage-slider">
+                    </div>
+                </div>
+                
+                <div class="fusion-sliders-container">
+                    <div class="fusion-slider-row">
+                        <div class="slider-container">
+                            <label>成绩权重</label>
+                            <span class="slider-percent-value" id="fusionScoreWeightValue">40%</span>
+                            <input type="range" id="fusionScoreWeightSlider" min="0" max="100" value="40" class="percentage-slider">
+                        </div>
+                    </div>
+                    <div class="fusion-slider-row">
+                        <div class="slider-container">
+                            <label>排名权重</label>
+                            <span class="slider-percent-value" id="fusionRankWeightValue">60%</span>
+                            <input type="range" id="fusionRankWeightSlider" min="0" max="100" value="60" class="percentage-slider">
+                        </div>
+                    </div>
+                    <div class="fusion-slider-row">
+                        <div class="slider-container">
+                            <label>奖励范围</label>
+                            <span class="slider-percent-value" id="fusionClassRewardPercentValue">30%</span>
+                            <input type="range" id="fusionClassRewardPercent" min="5" max="100" value="30" class="percentage-slider">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subject-header">
+                <h3>各科成绩输入</h3>
+                <button class="add-subject-btn" id="fusionAddSubjectBtn">+ 添加科目</button>
+            </div>
+            
+            <div class="subjects-grid" id="fusionSubjectsGrid"></div>
+            
+            <div class="mode-switch">
+                <div class="mode-btn active" id="fusionClassModeBtn">班级模式</div>
+                <div class="mode-btn" id="fusionSchoolModeBtn">年级模式</div>
+            </div>
+            
+            <div class="rank-mobile-layout">
+                <div class="rank-mobile-item">
+                    <div class="rank-mobile-label">班级/年级人数</div>
+                    <input type="number" id="fusionTotalStudents" min="1" value="55" placeholder="如：55" class="rank-mobile-input">
+                </div>
+                <div class="rank-mobile-item">
+                    <div class="rank-mobile-label">上次考试名次</div>
+                    <input type="number" id="fusionPreviousRank" min="1" value="20" placeholder="上次名次" class="rank-mobile-input">
+                </div>
+                <div class="rank-mobile-item">
+                    <div class="rank-mobile-label">本次考试名次</div>
+                    <input type="number" id="fusionCurrentRank" min="1" value="10" placeholder="本次名次" class="rank-mobile-input">
+                </div>
+            </div>
+            
+            <button class="reward-btn" onclick="calculateFusionReward()">计算融合奖励</button>
+            
+            <div class="result-container">
+                <div class="result-box" id="fusionResultBox">
+                    <div class="score-item">
+                        <span class="score-label">成绩奖励部分</span>
+                        <span class="score-value" id="fusionScoreReward">0 元</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">成绩奖励比例</span>
+                        <span class="score-value" id="fusionScoreRewardPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">排名奖励部分</span>
+                        <span class="score-value" id="fusionRankRewardPart">0 元</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">排名奖励比例</span>
+                        <span class="score-value" id="fusionRankRewardPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">融合奖励比例</span>
+                        <span class="score-value" id="fusionRewardPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">最终奖励金额</span>
+                        <span class="score-value reward-amount" id="fusionRewardAmount">0 元</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 模式三计算原理说明 -->
+            <div class="explanation-box">
+                <h3>⚖️ 模式三计算原理（融合奖励）</h3>
+                <p>综合考虑成绩和排名，各占一定比例，全面评价学生表现：</p>
+                <ul>
+                    <li><strong>成绩部分</strong>：采用模式一的平方根函数计算方法</li>
+                    <li><strong>排名部分</strong>：采用模式二的分档排名奖励计算方法</li>
+                    <li><strong>融合计算</strong>：最终奖励 = 成绩权重 × 成绩奖励 + 排名权重 × 排名奖励</li>
+                    <li><strong>权重设置</strong>：成绩权重和排名权重之和为100%，用户可自由调整比例</li>
+                    <li><strong>平衡激励</strong>：既鼓励提高分数，也鼓励超越他人，避免单一方面评价的局限性</li>
+                    <li><strong>适应不同场景</strong>：
+                        <ul>
+                            <li>重视基础的学生：可提高成绩权重比例</li>
+                            <li>鼓励竞争的学生：可提高排名权重比例</li>
+                            <li>全面发展：可设置为各占50%的平衡模式</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="modeMultiple" class="mode-content">
+            <h2>📅 多次考加权计算</h2>
+            
+            <div class="input-container">
+                <div class="compact-controls-row">
+                    <div class="reward-input-group">
+                        <label>奖励总额（元）</label>
+                        <input type="number" id="multipleTotalReward" min="0" value="1000" step="100">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label>允许丢分比</label>
+                        <span class="slider-percent-value" id="multipleLossPercentValue">30%</span>
+                        <input type="range" id="multipleLossPercentSlider" min="0" max="100" value="30" class="percentage-slider">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="exam-type-selector">
+                <div class="exam-type-btn active" data-exam-type="daily">日常小测</div>
+                <div class="exam-type-btn" data-exam-type="unit">月度测试</div>
+                <div class="exam-type-btn" data-exam-type="midterm">期中考试</div>
+                <div class="exam-type-btn" data-exam-type="final">期末考试</div>
+                <div class="exam-type-btn" data-exam-type="custom">自定义</div>
+            </div>
+            
+            <div class="subject-header">
+                <h3>各科成绩输入</h3>
+                <button class="add-subject-btn" id="multipleAddSubjectBtn">+ 添加科目</button>
+            </div>
+            
+            <div class="subjects-grid" id="multipleSubjectsGrid"></div>
+            
+            <div class="multiple-weight-row">
+                <label class="multiple-weight-label">当前考试类型权重</label>
+                <input type="number" id="multipleExamWeight" min="0" max="100" value="10" placeholder="权重" class="multiple-weight-input">
+                <span class="multiple-percent-sign">%</span>
+            </div>
+            
+            <button class="add-exam-btn" id="addExamRecordBtn" style="margin-bottom: 20px;">+ 添加此次考试</button>
+            
+            <h3>已录入的考试记录</h3>
+            <div class="table-container">
+                <table class="exam-records-table" id="examRecordsTable">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>考试类型</th>
+                            <th>权重(%)</th>
+                            <th>总分</th>
+                            <th>奖励比例(%)</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="examRecordsBody"></tbody>
+                </table>
+            </div>
+            
+            <button class="reward-btn" onclick="calculateMultipleExamReward()">计算加权奖励</button>
+            
+            <div class="result-container">
+                <div class="result-box" id="multipleResultBox">
+                    <div class="score-item">
+                        <span class="score-label">期末考试平均奖励比例</span>
+                        <span class="score-value" id="multipleFinalPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">期中考试平均奖励比例</span>
+                        <span class="score-value" id="multipleMidtermPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">月度测试平均奖励比例</span>
+                        <span class="score-value" id="multipleMonthlyPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">日常小测平均奖励比例</span>
+                        <span class="score-value" id="multipleDailyPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">自定义考试平均奖励比例</span>
+                        <span class="score-value" id="multipleCustomPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">加权奖励比例</span>
+                        <span class="score-value" id="multipleWeightedPercent">0%</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">最终奖励金额</span>
+                        <span class="score-value reward-amount" id="multipleRewardAmount">0 元</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 模式四计算原理说明 -->
+            <div class="explanation-box">
+                <h3>📅 模式四计算原理（多次考加权）</h3>
+                <p>为不同重要性的考试设置不同权重，每次考试独立记录，科学评价学生整体表现：</p>
+                <ul>
+                    <li><strong>单次考试记录</strong>：每次考试独立记录，便于管理和修改</li>
+                    <li><strong>总分计算</strong>：每次考试的总分 = 该次考试所有科目得分的总和（不是满分总和）</li>
+                    <li><strong>单次考试奖励比例</strong>：采用平方根函数计算每次考试的奖励比例
+                        <ul>
+                            <li>奖励比例 = 1 - √(丢分 ÷ 最大允许丢分)</li>
+                            <li>丢分 = 该次考试满分总和 - 该次考试实际得分总和</li>
+                            <li>最大允许丢分 = 该次考试满分总和 × 允许丢分百分比</li>
+                        </ul>
+                    </li>
+                    <li><strong>权重设置</strong>：为不同类型考试设置不同权重，反映考试重要性
+                        <ul>
+                            <li>期末考试权重：40%</li>
+                            <li>期中考试权重：25%</li>
+                            <li>月度测试权重：15%</li>
+                            <li>日常小测权重：10%</li>
+                            <li>自定义考试权重：20%</li>
+                        </ul>
+                    </li>
+                    <li><strong>加权平均奖励比例</strong>：加权奖励比例 = Σ(单次考试奖励比例 × 该次考试权重) ÷ Σ(所有考试权重)</li>
+                    <li><strong>最终奖励</strong>：最终奖励金额 = 奖励总额 × 加权奖励比例</li>
+                    <li><strong>特点</strong>：重要考试权重高，对总奖励影响大；每次考试独立记录，便于修改和管理</li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2026 考试成绩奖励计算器 v30 | 奖成绩、奖排名、奖平时、罚退步</p>
+        </footer>
+    </div>
+    
+    <script>
+        // 初始化科目数据
+        const initialSubjects = [
+            { name: '语文', maxScore: 120, actualScore: 0 },
+            { name: '数学', maxScore: 120, actualScore: 0 },
+            { name: '英语', maxScore: 120, actualScore: 0 },
+            { name: '物理', maxScore: 60, actualScore: 0 },
+            { name: '化学', maxScore: 60, actualScore: 0 },
+            { name: '生物', maxScore: 60, actualScore: 0 },
+            { name: '历史', maxScore: 60, actualScore: 0 },
+            { name: '地理', maxScore: 60, actualScore: 0 },
+            { name: '政治', maxScore: 60, actualScore: 0 },
+            { name: '体育', maxScore: 50, actualScore: 0 }
+        ];
+        
+        const initialDailySubject = [
+            { name: '语文', maxScore: 120, actualScore: 0 }
+        ];
+        
+        // 全局变量声明
+        let scoreSubjects = JSON.parse(JSON.stringify(initialSubjects));
+        let fusionSubjects = JSON.parse(JSON.stringify(initialSubjects));
+        let multipleSubjects = JSON.parse(JSON.stringify(initialDailySubject));
+        let examRecords = [];
+        let examRecordId = 1;
+        
+        // ============================================
+        // 从v10中提取的计算逻辑 - 成绩奖励计算（平方根函数）
+        // ============================================
+        function calculateScoreRewardLogic(totalScore, actualScore, lossPercent, totalReward) {
+            if (totalScore <= 0) return 0;
+            
+            const lostScore = totalScore - actualScore;
+            const maxLostScore = totalScore * (lossPercent / 100);
+            
+            if (lostScore >= maxLostScore) {
+                return {
+                    reward: 0,
+                    rewardRatio: 0,
+                    lostScore: lostScore,
+                    maxLostScore: maxLostScore,
+                    totalScore: totalScore,
+                    actualScore: actualScore
+                };
+            }
+            
+            // 平方根函数：奖励金额 = 满分奖励 × (1 - √(丢分 ÷ 最大允许丢分))
+            const rewardRatio = 1 - Math.sqrt(lostScore / maxLostScore);
+            const reward = totalReward * rewardRatio;
+            
+            return {
+                reward: reward,
+                rewardRatio: rewardRatio,
+                lostScore: lostScore,
+                maxLostScore: maxLostScore,
+                totalScore: totalScore,
+                actualScore: actualScore
+            };
+        }
+        
+        // ============================================
+        // 初始化科目网格
+        // ============================================
+        function initSubjectGrid(mode, subjects) {
+            const grid = document.getElementById(`${mode}SubjectsGrid`);
+            grid.innerHTML = '';
+            
+            subjects.forEach((subject, index) => {
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'subject-card subject-card-optimized';
+                subjectCard.innerHTML = `
+                    <div class="subject-top-row">
+                        <div class="subject-name-container">
+                            <div class="subject-name-label">科目</div>
+                            <input type="text" 
+                                   class="subject-name-input" 
+                                   data-mode="${mode}" 
+                                   data-index="${index}" 
+                                   value="${subject.name}" 
+                                   placeholder="科目"
+                                   maxlength="4">
+                        </div>
+                        <button class="delete-subject" data-mode="${mode}" data-index="${index}">×</button>
+                    </div>
+                    <div class="subject-inputs-row">
+                        <div class="score-input-item">
+                            <div class="score-label">满分</div>
+                            <input type="number" 
+                                   class="subject-max-score-input" 
+                                   data-mode="${mode}" 
+                                   data-index="${index}" 
+                                   value="${subject.maxScore}" 
+                                   min="1" 
+                                   max="1000" 
+                                   placeholder="满分">
+                        </div>
+                        <div class="score-input-item">
+                            <div class="score-label">得分</div>
+                            <input type="number" 
+                                   class="subject-score-input" 
+                                   data-mode="${mode}" 
+                                   data-index="${index}" 
+                                   value="${subject.actualScore}" 
+                                   min="0" 
+                                   max="${subject.maxScore}" 
+                                   placeholder="得分">
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(subjectCard);
+            });
+            
+            addSubjectEventListeners(mode);
+        }
+        
+        // ============================================
+        // 添加科目事件监听器
+        // ============================================
+        function addSubjectEventListeners(mode) {
+            document.querySelectorAll(`.subject-name-input[data-mode="${mode}"]`).forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    let subjects = getSubjectsByMode(mode);
+                    subjects[index].name = this.value;
+                });
+            });
+            
+            document.querySelectorAll(`.subject-max-score-input[data-mode="${mode}"]`).forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    const maxScore = parseInt(this.value) || 0;
+                    let subjects = getSubjectsByMode(mode);
+                    subjects[index].maxScore = maxScore;
+                    
+                    const card = this.closest('.subject-card');
+                    const scoreInput = card.querySelector('.subject-score-input');
+                    if (scoreInput) {
+                        scoreInput.max = maxScore;
+                        
+                        if (parseInt(scoreInput.value) > maxScore) {
+                            scoreInput.value = maxScore;
+                            subjects[index].actualScore = maxScore;
+                        }
+                    }
+                });
+            });
+            
+            document.querySelectorAll(`.subject-score-input[data-mode="${mode}"]`).forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    const card = this.closest('.subject-card');
+                    const maxScoreInput = card.querySelector('.subject-max-score-input');
+                    const maxScore = parseInt(maxScoreInput.value) || 0;
+                    let actualScore = parseInt(this.value) || 0;
+                    
+                    if (actualScore > maxScore) {
+                        actualScore = maxScore;
+                        this.value = maxScore;
+                    }
+                    
+                    if (actualScore < 0) {
+                        actualScore = 0;
+                        this.value = 0;
+                    }
+                    
+                    let subjects = getSubjectsByMode(mode);
+                    subjects[index].actualScore = actualScore;
+                });
+            });
+            
+            document.querySelectorAll(`.delete-subject[data-mode="${mode}"]`).forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    let subjects = getSubjectsByMode(mode);
+                    if (subjects.length <= 1) {
+                        alert("至少需要保留一个科目！");
+                        return;
+                    }
+                    subjects.splice(index, 1);
+                    initSubjectGrid(mode, subjects);
+                });
+            });
+        }
+        
+        // ============================================
+        // 获取对应模式的科目数据
+        // ============================================
+        function getSubjectsByMode(mode) {
+            if (mode === 'score') return scoreSubjects;
+            if (mode === 'fusion') return fusionSubjects;
+            return multipleSubjects;
+        }
+        
+        // ============================================
+        // 处理考试类型变化
+        // ============================================
+        function handleExamTypeChange() {
+            const activeBtn = document.querySelector('.exam-type-btn.active');
+            if (!activeBtn) return;
+            
+            const examType = activeBtn.dataset.examType;
+            const weightInput = document.getElementById('multipleExamWeight');
+            
+            // 设置不同考试类型的默认权重
+            switch(examType) {
+                case 'daily':
+                    weightInput.value = 10;
+                    break;
+                case 'unit':
+                    weightInput.value = 15;
+                    break;
+                case 'midterm':
+                    weightInput.value = 25;
+                    break;
+                case 'final':
+                    weightInput.value = 40;
+                    break;
+                case 'custom':
+                    weightInput.value = 20;
+                    break;
+            }
+            
+            if (examType === 'daily') {
+                multipleSubjects = JSON.parse(JSON.stringify(initialDailySubject));
+            } else {
+                multipleSubjects = JSON.parse(JSON.stringify(initialSubjects));
+            }
+            
+            initSubjectGrid('multiple', multipleSubjects);
+        }
+        
+        // ============================================
+        // 页面加载初始化
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化科目网格
+            initSubjectGrid('score', scoreSubjects);
+            initSubjectGrid('fusion', fusionSubjects);
+            initSubjectGrid('multiple', multipleSubjects);
+            
+            // 添加科目按钮事件监听
+            document.getElementById('scoreAddSubjectBtn').addEventListener('click', () => addSubject('score', scoreSubjects));
+            document.getElementById('fusionAddSubjectBtn').addEventListener('click', () => addSubject('fusion', fusionSubjects));
+            document.getElementById('multipleAddSubjectBtn').addEventListener('click', () => addSubject('multiple', multipleSubjects));
+            
+            // 初始化各个组件
+            initSliders();
+            initModeSwitches();
+            initExamTypeSelector();
+            initRankModeSwitch();
+            initFusionModeSwitch();
+            initRankAutoCalculation();
+            initMultipleExamLogic();
+            
+            // 初始计算
+            calculateRankReward();
+            calculateScoreReward();
+            calculateFusionReward();
+        });
+        
+        // ============================================
+        // 添加科目
+        // ============================================
+        function addSubject(mode, subjects) {
+            const name = prompt("请输入科目名称：", "新科目");
+            if (!name || !name.trim()) return;
+            
+            const maxScoreStr = prompt("请输入该科目总分：", "100");
+            const maxScore = parseInt(maxScoreStr) || 100;
+            
+            subjects.push({
+                name: name.trim(),
+                maxScore: maxScore,
+                actualScore: 0
+            });
+            
+            initSubjectGrid(mode, subjects);
+        }
+        
+        // ============================================
+        // 初始化滑块组件（包含模式三滑块联动修复）
+        // ============================================
+        function initSliders() {
+            // 模式一：允许丢分比滑块
+            const scoreSlider = document.getElementById('scoreLossPercentSlider');
+            const scoreValue = document.getElementById('scoreLossPercentValue');
+            scoreSlider.addEventListener('input', function() {
+                scoreValue.textContent = this.value + '%';
+                calculateScoreReward();
+            });
+            
+            // 模式二：奖励范围滑块
+            const rankClassSlider = document.getElementById('rankClassRewardPercent');
+            const rankClassValue = document.getElementById('rankClassRewardPercentValue');
+            rankClassSlider.addEventListener('input', function() {
+                rankClassValue.textContent = this.value + '%';
+                calculateRankReward();
+            });
+            
+            // 模式三：允许丢分比滑块
+            const fusionLossSlider = document.getElementById('fusionLossPercentSlider');
+            const fusionLossValue = document.getElementById('fusionLossPercentValue');
+            fusionLossSlider.addEventListener('input', function() {
+                fusionLossValue.textContent = this.value + '%';
+                calculateFusionReward();
+            });
+            
+            // ============================================
+            // 模式三滑块联动修复：成绩权重和排名权重滑块
+            // ============================================
+            const fusionScoreSlider = document.getElementById('fusionScoreWeightSlider');
+            const fusionScoreValue = document.getElementById('fusionScoreWeightValue');
+            const fusionRankSlider = document.getElementById('fusionRankWeightSlider');
+            const fusionRankValue = document.getElementById('fusionRankWeightValue');
+            
+            // 设置初始值（40%和60%，总和100%）
+            fusionScoreSlider.value = 40;
+            fusionScoreValue.textContent = '40%';
+            fusionRankSlider.value = 60;
+            fusionRankValue.textContent = '60%';
+            
+            // 成绩权重滑块事件监听
+            fusionScoreSlider.addEventListener('input', function() {
+                const scoreWeight = parseInt(this.value);
+                const rankWeight = 100 - scoreWeight;
+                
+                // 更新成绩权重显示
+                fusionScoreValue.textContent = scoreWeight + '%';
+                
+                // 更新排名权重滑块和显示
+                fusionRankSlider.value = rankWeight;
+                fusionRankValue.textContent = rankWeight + '%';
+                
+                // 计算融合奖励
+                calculateFusionReward();
+            });
+            
+            // 排名权重滑块事件监听
+            fusionRankSlider.addEventListener('input', function() {
+                const rankWeight = parseInt(this.value);
+                const scoreWeight = 100 - rankWeight;
+                
+                // 更新排名权重显示
+                fusionRankValue.textContent = rankWeight + '%';
+                
+                // 更新成绩权重滑块和显示
+                fusionScoreSlider.value = scoreWeight;
+                fusionScoreValue.textContent = scoreWeight + '%';
+                
+                // 计算融合奖励
+                calculateFusionReward();
+            });
+            
+            // 模式三：奖励范围滑块
+            const fusionClassSlider = document.getElementById('fusionClassRewardPercent');
+            const fusionClassValue = document.getElementById('fusionClassRewardPercentValue');
+            fusionClassSlider.addEventListener('input', function() {
+                fusionClassValue.textContent = this.value + '%';
+                calculateFusionReward();
+            });
+            
+            // 模式四：允许丢分比滑块
+            const multipleLossSlider = document.getElementById('multipleLossPercentSlider');
+            const multipleLossValue = document.getElementById('multipleLossPercentValue');
+            multipleLossSlider.addEventListener('input', function() {
+                multipleLossValue.textContent = this.value + '%';
+            });
+        }
+        
+        // ============================================
+        // 初始化模式切换
+        // ============================================
+        function initModeSwitches() {
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    const mode = this.getAttribute('data-mode');
+                    document.getElementById(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}`).classList.add('active');
+                });
+            });
+        }
+        
+        // ============================================
+        // 初始化考试类型选择器
+        // ============================================
+        function initExamTypeSelector() {
+            document.querySelectorAll('.exam-type-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.exam-type-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    handleExamTypeChange();
+                });
+            });
+        }
+        
+        // ============================================
+        // 初始化排名模式切换
+        // ============================================
+        function initRankModeSwitch() {
+            const classModeBtn = document.getElementById('rankClassModeBtn');
+            const schoolModeBtn = document.getElementById('rankSchoolModeBtn');
+            
+            classModeBtn.addEventListener('click', function() {
+                classModeBtn.classList.add('active');
+                schoolModeBtn.classList.remove('active');
+                calculateRankReward();
+            });
+            
+            schoolModeBtn.addEventListener('click', function() {
+                schoolModeBtn.classList.add('active');
+                classModeBtn.classList.remove('active');
+                calculateRankReward();
+            });
+        }
+        
+        // ============================================
+        // 初始化排名自动计算
+        // ============================================
+        function initRankAutoCalculation() {
+            document.getElementById('rankTotalStudents').addEventListener('input', function() {
+                const totalStudents = parseInt(this.value) || 55;
+                if (totalStudents > 150) {
+                    if (!document.getElementById('rankSchoolModeBtn').classList.contains('active')) {
+                        document.getElementById('rankSchoolModeBtn').click();
+                    }
+                } else {
+                    if (!document.getElementById('rankClassModeBtn').classList.contains('active')) {
+                        document.getElementById('rankClassModeBtn').click();
+                    }
+                }
+                calculateRankReward();
+            });
+            
+            document.getElementById('rankTotalReward').addEventListener('input', calculateRankReward);
+            document.getElementById('rankCurrent').addEventListener('input', calculateRankReward);
+            document.getElementById('rankPrevious').addEventListener('input', calculateRankReward);
+            document.getElementById('rankClassRewardPercent').addEventListener('input', calculateRankReward);
+            
+            document.getElementById('rankClassModeBtn').addEventListener('click', calculateRankReward);
+            document.getElementById('rankSchoolModeBtn').addEventListener('click', calculateRankReward);
+        }
+        
+        // ============================================
+        // 初始化融合模式切换
+        // ============================================
+        function initFusionModeSwitch() {
+            const classModeBtn = document.getElementById('fusionClassModeBtn');
+            const schoolModeBtn = document.getElementById('fusionSchoolModeBtn');
+            
+            classModeBtn.addEventListener('click', function() {
+                classModeBtn.classList.add('active');
+                schoolModeBtn.classList.remove('active');
+                calculateFusionReward();
+            });
+            
+            schoolModeBtn.addEventListener('click', function() {
+                schoolModeBtn.classList.add('active');
+                classModeBtn.classList.remove('active');
+                calculateFusionReward();
+            });
+        }
+        
+        // ============================================
+        // 初始化多次考试逻辑
+        // ============================================
+        function initMultipleExamLogic() {
+            document.getElementById('addExamRecordBtn').addEventListener('click', addExamRecord);
+        }
+        
+        // ============================================
+        // 从v27中提取的排名奖励计算逻辑
+        // ============================================
+        function calculateTierBoundaries(totalStudents, rewardPercent) {
+            const eliteEnd = Math.max(1, Math.floor(totalStudents * 0.01));
+            const excellentEnd = Math.max(eliteEnd + 1, Math.floor(totalStudents * 0.05));
+            const goodEnd = Math.max(excellentEnd + 1, Math.floor(totalStudents * 0.2));
+            const rewardEnd = Math.max(goodEnd + 1, Math.floor(totalStudents * (rewardPercent / 100)));
+            
+            return {
+                eliteEnd: eliteEnd,
+                excellentEnd: excellentEnd,
+                goodEnd: goodEnd,
+                rewardEnd: rewardEnd
+            };
+        }
+        
+        function getTierForRank(rank, boundaries) {
+            if (rank <= boundaries.eliteEnd) return 1;
+            if (rank <= boundaries.excellentEnd) return 2;
+            if (rank <= boundaries.goodEnd) return 3;
+            if (rank <= boundaries.rewardEnd) return 4;
+            return 5;
+        }
+        
+        function getTierRewardPercent(tier) {
+            const rewardPercents = {1: 0.10, 2: 0.08, 3: 0.06, 4: 0.05, 5: 0.03};
+            return rewardPercents[tier] || 0;
+        }
+        
+        function calculateProgressReward(startRank, endRank, totalReward, boundaries, isSchoolMode, totalStudents, currentBaseReward) {
+            if (startRank === endRank) {
+                return {
+                    amount: 0,
+                    detail: "名次无变化"
+                };
+            }
+            
+            const isProgress = startRank > endRank;
+            const direction = isProgress ? 1 : -1;
+            
+            let lower = Math.min(startRank, endRank);
+            let upper = Math.max(startRank, endRank);
+            
+            let tierCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            
+            for (let rank = lower + 1; rank <= upper; rank++) {
+                const tier = getTierForRank(rank - 1, boundaries);
+                if (tier > 0) {
+                    tierCounts[tier]++;
+                }
+            }
+            
+            let totalProgressReward = 0;
+            let detailText = "";
+            
+            for (let tier = 1; tier <= 5; tier++) {
+                if (tierCounts[tier] > 0) {
+                    let tierPercent = getTierRewardPercent(tier);
+                    let tierReward = 0;
+                    
+                    if (tier === 5) {
+                        tierReward = totalReward * tierPercent * tierCounts[tier] * direction;
+                    } else {
+                        tierReward = currentBaseReward * tierPercent * tierCounts[tier] * direction;
+                    }
+                    
+                    if (isSchoolMode) {
+                        tierReward = totalReward * tierPercent * tierCounts[tier] * direction;
+                    }
+                    
+                    totalProgressReward += tierReward;
+                    
+                    if (detailText) detailText += "<br>";
+                    const tierName = tier === 5 ? "无奖区" : `档位${tier}`;
+                    const baseAmount = (tier === 5 || isSchoolMode) ? totalReward : currentBaseReward;
+                    detailText += `${tierName}：${tierCounts[tier]}名 × ${(tierPercent*100).toFixed(0)}% × ${baseAmount.toFixed(0)}元 = ${(tierReward).toFixed(2)}元`;
+                }
+            }
+            
+            if (isSchoolMode) {
+                const scaleFactor = 55 / totalStudents;
+                totalProgressReward *= scaleFactor;
+                if (detailText) {
+                    detailText += `<br>全校缩放：× 55 ÷ ${totalStudents} = × ${scaleFactor.toFixed(4)}`;
+                }
+            }
+            
+            return {
+                amount: totalProgressReward,
+                detail: detailText
+            };
+        }
+        
+        function calculateClassRankReward(totalStudents, currentRank, previousRank, minRewardPercent, totalReward) {
+            if (currentRank < 1) currentRank = 1;
+            if (previousRank < 1) previousRank = 1;
+            if (currentRank > totalStudents) currentRank = totalStudents;
+            if (previousRank > totalStudents) previousRank = totalStudents;
+            
+            const boundaries = calculateTierBoundaries(totalStudents, minRewardPercent);
+            const T = boundaries.rewardEnd;
+            
+            let baseReward = 0;
+            let tier = "";
+            
+            if (currentRank <= T) {
+                if (currentRank === 1) {
+                    baseReward = totalReward * 0.8;
+                    tier = "精英第一";
+                } else if (currentRank === 2) {
+                    baseReward = totalReward * 0.6;
+                    tier = "精英第二";
+                } else if (currentRank === 3) {
+                    baseReward = totalReward * 0.4;
+                    tier = "精英第三";
+                } else if (currentRank === 4) {
+                    baseReward = totalReward * 0.3;
+                    tier = "优秀第四";
+                } else if (currentRank === 5) {
+                    baseReward = totalReward * 0.2;
+                    tier = "优秀第五";
+                } else if (currentRank <= 10) {
+                    baseReward = totalReward * 0.15;
+                    tier = "优秀前十";
+                } else {
+                    baseReward = totalReward * 0.1;
+                    tier = "良好有奖";
+                }
+            } else {
+                baseReward = 0;
+                tier = "无奖范围";
+            }
+            
+            const progressResult = calculateProgressReward(previousRank, currentRank, totalReward, boundaries, false, totalStudents, baseReward);
+            const progressReward = progressResult.amount;
+            
+            let finalReward = baseReward + progressReward;
+            
+            if (finalReward > totalReward) {
+                finalReward = totalReward;
+            } else if (finalReward < -totalReward) {
+                finalReward = -totalReward;
+            }
+            
+            return {
+                reward: finalReward,
+                baseReward: baseReward,
+                progressReward: progressReward,
+                tier: tier,
+                detail: progressResult.detail
+            };
+        }
+        
+        function calculateSchoolRankReward(totalStudents, currentRank, previousRank, rewardPercent, totalReward) {
+            if (currentRank < 1) currentRank = 1;
+            if (previousRank < 1) previousRank = 1;
+            if (currentRank > totalStudents) currentRank = totalStudents;
+            if (previousRank > totalStudents) previousRank = totalStudents;
+            
+            const boundaries = calculateTierBoundaries(totalStudents, rewardPercent);
+            const T = boundaries.rewardEnd;
+            
+            let baseReward = 0;
+            let tier = "";
+            
+            if (currentRank <= T) {
+                if (currentRank <= boundaries.eliteEnd) {
+                    const positionInElite = currentRank / boundaries.eliteEnd;
+                    baseReward = totalReward * (0.4 + 0.4 * (1 - positionInElite));
+                    tier = "精英区";
+                } else if (currentRank <= boundaries.excellentEnd) {
+                    const positionInExcellent = (currentRank - boundaries.eliteEnd) / (boundaries.excellentEnd - boundaries.eliteEnd);
+                    baseReward = totalReward * (0.2 + 0.2 * (1 - positionInExcellent));
+                    tier = "优秀区";
+                } else if (currentRank <= boundaries.goodEnd) {
+                    const positionInGood = (currentRank - boundaries.excellentEnd) / (boundaries.goodEnd - boundaries.excellentEnd);
+                    baseReward = totalReward * (0.1 + 0.1 * (1 - positionInGood));
+                    tier = "良好区";
+                } else {
+                    const positionInProgress = (currentRank - boundaries.goodEnd) / (T - boundaries.goodEnd);
+                    baseReward = totalReward * (0.05 + 0.05 * (1 - positionInProgress));
+                    tier = "进步区";
+                }
+            } else {
+                baseReward = 0;
+                tier = "无奖范围";
+            }
+            
+            const progressResult = calculateProgressReward(previousRank, currentRank, totalReward, boundaries, true, totalStudents, baseReward);
+            const progressReward = progressResult.amount;
+            
+            let finalReward = baseReward + progressReward;
+            
+            if (finalReward > totalReward) {
+                finalReward = totalReward;
+            } else if (finalReward < -totalReward) {
+                finalReward = -totalReward;
+            }
+            
+            return {
+                reward: finalReward,
+                baseReward: baseReward,
+                progressReward: progressReward,
+                tier: tier,
+                detail: progressResult.detail
+            };
+        }
+        
+        // ============================================
+        // 更新排名结果显示
+        // ============================================
+        function updateRankResultDisplay(result, modeName, totalReward, currentRank, previousRank) {
+            document.getElementById('rankCurrentMode').textContent = modeName;
+            
+            const rankDiff = previousRank - currentRank;
+            let rankChangeText = "";
+            if (rankDiff > 0) {
+                rankChangeText = `进步${rankDiff}名`;
+            } else if (rankDiff < 0) {
+                rankChangeText = `退步${Math.abs(rankDiff)}名`;
+            } else {
+                rankChangeText = "名次不变";
+            }
+            document.getElementById('rankChange').textContent = rankChangeText;
+            
+            document.getElementById('rankCurrentTier').textContent = result.tier;
+            
+            document.getElementById('rankBaseReward').textContent = `${result.baseReward.toFixed(2)} 元`;
+            
+            const progressRewardElement = document.getElementById('rankProgressReward');
+            if (result.progressReward > 0) {
+                progressRewardElement.className = 'score-value reward-amount';
+                progressRewardElement.textContent = `+${result.progressReward.toFixed(2)} 元`;
+            } else if (result.progressReward < 0) {
+                progressRewardElement.className = 'score-value penalty-amount';
+                progressRewardElement.textContent = `${result.progressReward.toFixed(2)} 元`;
+            } else {
+                progressRewardElement.className = 'score-value';
+                progressRewardElement.textContent = `0 元`;
+            }
+            
+            const rewardAmountElement = document.getElementById('rankRewardAmount');
+            if (result.reward < 0) {
+                rewardAmountElement.className = 'score-value penalty-amount';
+                rewardAmountElement.textContent = `${result.reward.toFixed(2)} 元`;
+            } else {
+                rewardAmountElement.className = 'score-value reward-amount';
+                rewardAmountElement.textContent = `${result.reward.toFixed(2)} 元`;
+            }
+            
+            const rewardPercentValue = (result.reward / totalReward * 100);
+            document.getElementById('rankRewardPercent').textContent = `${isNaN(rewardPercentValue) ? "0.0" : rewardPercentValue.toFixed(1)}%`;
+        }
+        
+        // ============================================
+        // 模式一：成绩奖励计算
+        // ============================================
+        function calculateScoreReward() {
+            const totalReward = parseFloat(document.getElementById('scoreTotalReward').value) || 1000;
+            const lossPercent = parseInt(document.getElementById('scoreLossPercentSlider').value) || 30;
+            
+            let totalScore = 0;
+            let actualScore = 0;
+            
+            scoreSubjects.forEach(subject => {
+                totalScore += subject.maxScore;
+                actualScore += (subject.actualScore || 0);
+            });
+            
+            const result = calculateScoreRewardLogic(totalScore, actualScore, lossPercent, totalReward);
+            
+            // 更新显示
+            document.getElementById('scoreTotalScore').textContent = result.actualScore;
+            document.getElementById('scoreTotal').textContent = result.totalScore;
+            document.getElementById('scoreLostPoints').textContent = result.lostScore;
+            document.getElementById('scoreMaxLossPoints').textContent = result.maxLostScore.toFixed(0);
+            document.getElementById('scoreRewardPercent').textContent = `${(result.rewardRatio * 100).toFixed(1)}%`;
+            document.getElementById('scoreRewardAmount').textContent = `${result.reward.toFixed(2)} 元`;
+        }
+        
+        // ============================================
+        // 模式二：排名奖励计算
+        // ============================================
+        function calculateRankReward() {
+            const totalStudents = parseInt(document.getElementById('rankTotalStudents').value) || 55;
+            const totalReward = parseFloat(document.getElementById('rankTotalReward').value) || 1000;
+            const currentRank = parseInt(document.getElementById('rankCurrent').value) || 10;
+            const previousRank = parseInt(document.getElementById('rankPrevious').value) || 20;
+            
+            let currentMode = 'class';
+            if (totalStudents > 150) {
+                currentMode = 'school';
+                if (!document.getElementById('rankSchoolModeBtn').classList.contains('active')) {
+                    document.getElementById('rankSchoolModeBtn').click();
+                }
+            } else {
+                currentMode = 'class';
+                if (!document.getElementById('rankClassModeBtn').classList.contains('active')) {
+                    document.getElementById('rankClassModeBtn').click();
+                }
+            }
+            
+            let result;
+            let modeName = currentMode === 'school' ? `年级模式（${totalStudents}人）` : `班级模式（${totalStudents}人）`;
+            
+            if (currentMode === 'school') {
+                const rewardPercent = parseInt(document.getElementById('rankClassRewardPercent').value) || 30;
+                result = calculateSchoolRankReward(totalStudents, currentRank, previousRank, rewardPercent, totalReward);
+            } else {
+                const minRewardPercent = parseInt(document.getElementById('rankClassRewardPercent').value) || 30;
+                result = calculateClassRankReward(totalStudents, currentRank, previousRank, minRewardPercent, totalReward);
+            }
+            
+            updateRankResultDisplay(result, modeName, totalReward, currentRank, previousRank);
+        }
+        
+        // ============================================
+        // 模式三：融合奖励计算
+        // ============================================
+        function calculateFusionReward() {
+            const totalReward = parseFloat(document.getElementById('fusionTotalReward').value) || 1000;
+            const lossPercent = parseInt(document.getElementById('fusionLossPercentSlider').value) || 30;
+            const scoreWeight = parseInt(document.getElementById('fusionScoreWeightSlider').value) / 100 || 0.4;
+            const rankWeight = parseInt(document.getElementById('fusionRankWeightSlider').value) / 100 || 0.6;
+            
+            // 计算成绩部分
+            let totalScore = 0;
+            let actualScore = 0;
+            
+            fusionSubjects.forEach(subject => {
+                totalScore += subject.maxScore;
+                actualScore += (subject.actualScore || 0);
+            });
+            
+            const scoreResult = calculateScoreRewardLogic(totalScore, actualScore, lossPercent, totalReward);
+            const scoreReward = scoreResult.reward;
+            const scoreRewardRatio = scoreResult.rewardRatio;
+            
+            // 计算排名部分
+            const totalStudents = parseInt(document.getElementById('fusionTotalStudents').value) || 55;
+            const currentRank = parseInt(document.getElementById('fusionCurrentRank').value) || 10;
+            const previousRank = parseInt(document.getElementById('fusionPreviousRank').value) || 20;
+            const rewardPercent = parseInt(document.getElementById('fusionClassRewardPercent').value) || 30;
+            
+            let rankResult;
+            const isSchoolMode = document.getElementById('fusionSchoolModeBtn').classList.contains('active');
+            
+            if (isSchoolMode) {
+                rankResult = calculateSchoolRankReward(totalStudents, currentRank, previousRank, rewardPercent, totalReward);
+            } else {
+                rankResult = calculateClassRankReward(totalStudents, currentRank, previousRank, rewardPercent, totalReward);
+            }
+            
+            const rankReward = rankResult.reward;
+            const rankRewardRatio = rankReward / totalReward;
+            
+            // 计算融合奖励
+            const fusionReward = scoreWeight * scoreReward + rankWeight * rankReward;
+            const fusionRewardRatio = fusionReward / totalReward;
+            
+            // 更新显示
+            document.getElementById('fusionScoreReward').textContent = `${scoreReward.toFixed(2)} 元`;
+            document.getElementById('fusionScoreRewardPercent').textContent = `${(scoreRewardRatio * 100).toFixed(1)}%`;
+            document.getElementById('fusionRankRewardPart').textContent = `${rankReward.toFixed(2)} 元`;
+            document.getElementById('fusionRankRewardPercent').textContent = `${(rankRewardRatio * 100).toFixed(1)}%`;
+            document.getElementById('fusionRewardPercent').textContent = `${(fusionRewardRatio * 100).toFixed(1)}%`;
+            document.getElementById('fusionRewardAmount').textContent = `${fusionReward.toFixed(2)} 元`;
+        }
+        
+        // ============================================
+        // 模式四：多次考加权计算
+        // ============================================
+        function addExamRecord() {
+            const activeBtn = document.querySelector('.exam-type-btn.active');
+            if (!activeBtn) return;
+            
+            const examType = activeBtn.dataset.examType;
+            const weight = parseInt(document.getElementById('multipleExamWeight').value) || 20;
+            const lossPercent = parseInt(document.getElementById('multipleLossPercentSlider').value) || 30;
+            
+            // 计算当前考试的总分（满分总和）和实际得分总和
+            let maxScoreTotal = 0; // 满分总和
+            let actualScoreTotal = 0; // 实际得分总和
+            
+            multipleSubjects.forEach(subject => {
+                maxScoreTotal += subject.maxScore;
+                actualScoreTotal += (subject.actualScore || 0);
+            });
+            
+            if (maxScoreTotal === 0) {
+                alert("请至少录入一门科目的成绩！");
+                return;
+            }
+            
+            // 计算奖励比例
+            const result = calculateScoreRewardLogic(maxScoreTotal, actualScoreTotal, lossPercent, 100); // 用100作为基础来计算比例
+            const rewardRatio = result.rewardRatio;
+            
+            // 考试类型名称映射
+            const typeNames = {
+                'daily': '日常小测',
+                'unit': '月度测试',
+                'midterm': '期中考试',
+                'final': '期末考试',
+                'custom': '自定义考试'
+            };
+            
+            const examName = typeNames[examType] || '自定义考试';
+            
+            // 添加新的考试记录（每次考试独立记录）
+            examRecords.push({
+                id: examRecordId++,
+                name: examName,
+                weight: weight,
+                totalScore: actualScoreTotal, // 记录实际得分总和
+                rewardRatio: rewardRatio,
+                type: examType
+            });
+            
+            updateExamTable();
+            calculateMultipleExamReward();
+        }
+        
+        // ============================================
+        // 更新考试记录表格
+        // ============================================
+        function updateExamTable() {
+            const tbody = document.getElementById('examRecordsBody');
+            tbody.innerHTML = '';
+            
+            examRecords.forEach((exam, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${exam.id}</td>
+                    <td>${exam.name}</td>
+                    <td>${exam.weight}%</td>
+                    <td>${exam.totalScore}</td>
+                    <td>${(exam.rewardRatio * 100).toFixed(1)}%</td>
+                    <td>
+                        <button class="delete-record-btn" data-exam-index="${index}">×</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 添加删除事件监听
+            document.querySelectorAll('.delete-record-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.examIndex);
+                    examRecords.splice(index, 1);
+                    updateExamTable();
+                    calculateMultipleExamReward();
+                });
+            });
+        }
+        
+        // ============================================
+        // 计算多次考加权奖励
+        // ============================================
+        function calculateMultipleExamReward() {
+            const totalReward = parseFloat(document.getElementById('multipleTotalReward').value) || 1000;
+            
+            if (examRecords.length === 0) {
+                // 如果没有考试记录，显示0
+                document.getElementById('multipleFinalPercent').textContent = "0%";
+                document.getElementById('multipleMidtermPercent').textContent = "0%";
+                document.getElementById('multipleMonthlyPercent').textContent = "0%";
+                document.getElementById('multipleDailyPercent').textContent = "0%";
+                document.getElementById('multipleCustomPercent').textContent = "0%";
+                document.getElementById('multipleWeightedPercent').textContent = "0%";
+                document.getElementById('multipleRewardAmount').textContent = "0 元";
+                return;
+            }
+            
+            // 计算各类型考试的平均奖励比例
+            let finalTotal = 0, finalCount = 0;
+            let midtermTotal = 0, midtermCount = 0;
+            let monthlyTotal = 0, monthlyCount = 0;
+            let dailyTotal = 0, dailyCount = 0;
+            let customTotal = 0, customCount = 0;
+            
+            examRecords.forEach(exam => {
+                if (exam.type === 'final') {
+                    finalTotal += exam.rewardRatio;
+                    finalCount++;
+                } else if (exam.type === 'midterm') {
+                    midtermTotal += exam.rewardRatio;
+                    midtermCount++;
+                } else if (exam.type === 'unit') {
+                    monthlyTotal += exam.rewardRatio;
+                    monthlyCount++;
+                } else if (exam.type === 'daily') {
+                    dailyTotal += exam.rewardRatio;
+                    dailyCount++;
+                } else if (exam.type === 'custom') {
+                    customTotal += exam.rewardRatio;
+                    customCount++;
+                }
+            });
+            
+            // 计算加权平均
+            let totalWeight = 0;
+            let weightedRewardSum = 0;
+            
+            examRecords.forEach(exam => {
+                totalWeight += exam.weight;
+                weightedRewardSum += exam.rewardRatio * exam.weight;
+            });
+            
+            const weightedRewardRatio = totalWeight > 0 ? weightedRewardSum / totalWeight : 0;
+            const finalReward = totalReward * weightedRewardRatio;
+            
+            // 更新显示
+            document.getElementById('multipleFinalPercent').textContent = finalCount > 0 ? `${(finalTotal / finalCount * 100).toFixed(1)}%` : "0%";
+            document.getElementById('multipleMidtermPercent').textContent = midtermCount > 0 ? `${(midtermTotal / midtermCount * 100).toFixed(1)}%` : "0%";
+            document.getElementById('multipleMonthlyPercent').textContent = monthlyCount > 0 ? `${(monthlyTotal / monthlyCount * 100).toFixed(1)}%` : "0%";
+            document.getElementById('multipleDailyPercent').textContent = dailyCount > 0 ? `${(dailyTotal / dailyCount * 100).toFixed(1)}%` : "0%";
+            document.getElementById('multipleCustomPercent').textContent = customCount > 0 ? `${(customTotal / customCount * 100).toFixed(1)}%` : "0%";
+            document.getElementById('multipleWeightedPercent').textContent = `${(weightedRewardRatio * 100).toFixed(1)}%`;
+            document.getElementById('multipleRewardAmount').textContent = `${finalReward.toFixed(2)} 元`;
+        }
+    </script>
+</body>
+</html>
